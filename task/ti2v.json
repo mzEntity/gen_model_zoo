@@ -1,0 +1,34 @@
+{
+    "input_base": "/root/workspace/input",
+    "output_base": "",
+    "task_list": [
+        {
+            "text": "镜头缓慢推进莫高窟外部，沙尘随风飘扬，光影变化，展示历史感的敦煌风貌",
+            "image_path": "/root/workspace/gen_model_zoo/output/T2I/0.png"
+        },
+        {
+            "text": "环绕镜头展示洞内壁画和经卷，微尘漂浮，烛光闪烁，呈现历史的厚重感",
+            "image_path": "/root/workspace/gen_model_zoo/output/T2I/1.png"
+        },
+        {
+            "text": "驼队缓慢前行，商旅剪影被夕阳拉长，沙丘起伏，远景渐模糊",
+            "image_path": "/root/workspace/gen_model_zoo/output/T2I/2.png"
+        },
+        {
+            "text": "飞天人物在空中旋转起舞，花瓣飘散，画面如壁画复活般展开",
+            "image_path": "/root/workspace/gen_model_zoo/output/T2I/3.png"
+        },
+        {
+            "text": "AI算法在屏幕上自动复原壁画颜色与线条，科学家注视屏幕，科技与艺术融合",
+            "image_path": "/root/workspace/gen_model_zoo/output/T2I/4.png"
+        },
+        {
+            "text": "壁画线条缓缓生长，色彩渐渐复原，数字特效表现修复过程",
+            "image_path": "/root/workspace/gen_model_zoo/output/T2I/5.png"
+        },
+        {
+            "text": "飞天由数据粒子构成，从虚拟世界飞出，翱翔天空，最后融入光明",
+            "image_path": "/root/workspace/gen_model_zoo/output/T2I/6.png"
+        }
+    ]
+}

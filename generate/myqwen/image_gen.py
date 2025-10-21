@@ -1,10 +1,13 @@
 from diffusers import QwenImagePipeline, QwenImageEditPipeline, QwenImageEditPlusPipeline
+
 import torch
 from PIL import Image
 import gc
+import os
 
+from generate.generating import MyBasePipeline
 
-class MyQwenImagePipeline:
+class MyQwenImagePipeline(MyBasePipeline):
     def __init__(self, model_path, language, ratio):
         self.model_path = model_path
         
@@ -41,13 +44,13 @@ class MyQwenImagePipeline:
         self.pipeline = QwenImagePipeline.from_pretrained(self.model_path, torch_dtype=self.torch_dtype)
         self.pipeline = self.pipeline.to(self.device)
         
-        
-    def __call__(self, prompt, negative_prompt=' '):
+            
+    def __call__(self, text, negative_text=' '):
         if self.pipeline is None:
             raise ValueError("The pipeline has already been closed.")
         image = self.pipeline(
-            prompt = prompt + self.positive_magic[self.language],
-            negative_prompt=negative_prompt,
+            prompt = text + self.positive_magic[self.language],
+            negative_prompt=negative_text,
             width=self.width,
             height=self.height,
             num_inference_steps=50,
@@ -55,6 +58,11 @@ class MyQwenImagePipeline:
             generator=torch.Generator(device="cuda").manual_seed(42)
         ).images[0]
         return image
+    
+    
+    def save(self, image, **output_cfg):
+        save_path = output_cfg['path']
+        image.save(os.path.join(self.output_base_dir, save_path))
     
     
     def close(self):
@@ -66,19 +74,7 @@ class MyQwenImagePipeline:
         
 
 
-def QwenImage_generate_image(cfg):
-    pipeline = MyQwenImagePipeline(cfg['model_path'], cfg['language'], cfg['ratio'])
-
-    def gen(**kwargs):
-        prompt = kwargs.get("prompt", "")
-        return pipeline(prompt)
-        
-    gen._pipeline = pipeline
-    return gen
-
-
-
-class MyQwenImageEditPlusPipeline:
+class MyQwenImageEditPlusPipeline(MyBasePipeline):
     def __init__(self, model_path, language):
         self.model_path = model_path
         
@@ -96,18 +92,18 @@ class MyQwenImageEditPlusPipeline:
         self.pipeline.set_progress_bar_config(disable=None)
         
         
-    def __call__(self, prompt, image_path_list, negative_prompt=' '):
+    def __call__(self, text, image_path_list, negative_text=' '):
         if self.pipeline is None:
             raise ValueError("The pipeline has already been closed.")
         
         image_list = []
         for image_path in image_path_list:
-            image = Image.open(image_path)
+            image = Image.open(os.path.join(self.input_base_dir, image_path))
             image_list.append(image)
             
         inputs = {
             "image": image_list,
-            "prompt": prompt,
+            "prompt": text,
             "generator": torch.manual_seed(42),
             "true_cfg_scale": 4.0,
             "negative_prompt": " ",
@@ -122,23 +118,15 @@ class MyQwenImageEditPlusPipeline:
             return output_image
     
     
+    def save(self, image, **output_cfg):
+        save_path = output_cfg['path']
+        image.save(os.path.join(self.output_base_dir, save_path))
+    
+    
     def close(self):
         if self.pipeline is not None:
             del self.pipeline
             self.pipeline = None
             torch.cuda.empty_cache()
             gc.collect()
-        
-        
-def QwenImageEditPlus_generate_image(cfg):
-    pipeline = MyQwenImageEditPlusPipeline(cfg['model_path'], cfg['language'])
-
-    def gen(**kwargs):
-        prompt = kwargs.get("prompt", "")
-        image_path_list = kwargs.get("image_path_list", [])
-        return pipeline(prompt, image_path_list)
-        
-    gen._pipeline = pipeline
-    return gen
-
 

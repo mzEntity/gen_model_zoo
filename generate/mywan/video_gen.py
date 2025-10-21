@@ -15,6 +15,8 @@ import generate.mywan.wan as wan
 from generate.mywan.wan.configs import MAX_AREA_CONFIGS, SIZE_CONFIGS, WAN_CONFIGS
 from generate.mywan.wan.utils.utils import save_video
 
+from generate.generating import MyBasePipeline
+
 
 def _init_logging():
     logging.basicConfig(
@@ -23,7 +25,7 @@ def _init_logging():
         handlers=[logging.StreamHandler(stream=sys.stdout)])
 
 
-class MyWanTI2VPipeline:
+class MyWanTI2VPipeline(MyBasePipeline):
     def __init__(self, model_path):
         _init_logging()
         cfg = WAN_CONFIGS['ti2v-5B']
@@ -47,7 +49,7 @@ class MyWanTI2VPipeline:
             convert_model_dtype=convert_model_dtype,
         )
     
-    def __call__(self, prompt, image_path, frame_num, size, save_path=None):
+    def __call__(self, text, image_path, frame_num=121, size='1280*704'):
         size_choices = ('704*1280', '1280*704')
         
         assert size in size_choices
@@ -55,7 +57,7 @@ class MyWanTI2VPipeline:
             
         seed = 42
                 
-        logging.info(f"Input prompt: {prompt}")
+        logging.info(f"Input prompt: {text}")
 
         img = Image.open(image_path).convert("RGB")
         logging.info(f"Input image: {image_path}")
@@ -67,7 +69,7 @@ class MyWanTI2VPipeline:
         sample_solver = 'unipc'
         sample_shift = 5.0
         video = self.pipeline.generate(
-            prompt,
+            text,
             img=img,
             size=SIZE_CONFIGS[size],
             max_area=MAX_AREA_CONFIGS[size],
@@ -79,19 +81,19 @@ class MyWanTI2VPipeline:
             seed=seed,
             offload_model=offload_model)
         
-        if save_path is not None:
-            logging.info(f"Saving generated video to {save_path}")
-            sample_fps = 24
-            save_video(
-                tensor=video[None],
-                save_file=save_path,
-                fps=sample_fps,
-                nrow=1,
-                normalize=True,
-                value_range=(-1, 1))
-
         logging.info("Finished.")
         return video
+    
+    def save(self, video, **output_cfg):
+        save_path = output_cfg['path']
+        sample_fps = 24
+        save_video(
+            tensor=video[None],
+            save_file=os.path.join(self.output_base_dir, save_path),
+            fps=sample_fps,
+            nrow=1,
+            normalize=True,
+            value_range=(-1, 1))
     
     def close(self):
         if self.pipeline is not None:
@@ -100,17 +102,3 @@ class MyWanTI2VPipeline:
             torch.cuda.empty_cache()
             gc.collect()
     
-    
-def WanTI2V_generate_video(cfg):
-    pipeline = MyWanTI2VPipeline(cfg['model_path'])
-    
-    def gen(**kwargs):
-        prompt = kwargs.get("prompt", "")
-        first_frame_path = kwargs.get("first_frame_path", "")
-        frame_num = kwargs.get("frame_num", 121)
-        size = kwargs.get("size", '1280*704') # width, height
-        save_path = kwargs.get("save_path", None)
-        return pipeline(prompt, first_frame_path, frame_num, size, save_path)
-        
-    gen._pipeline = pipeline
-    return gen

@@ -1,3 +1,19 @@
+class MyBasePipeline:
+    def __init__(self):
+        pass
+    
+    def set_io_base(self, input_base_dir, output_base_dir): 
+        self.input_base_dir = input_base_dir
+        self.output_base_dir = output_base_dir
+        
+    def save(self, call_result, **output_cfg):
+        raise NotImplementedError("save(call_result, **output_cfg) not implemented in subclass")
+    
+    def close(self):
+        raise NotImplementedError("close() not implemented in subclass")
+
+
+
 class DemoImagePipeline:
     def __init__(self, cfg):
         self.cfg = cfg
@@ -114,3 +130,13 @@ def release_voice_pipeline():
     if _voice_generate_func is not None:
         _voice_generate_func._pipeline.close()
         _voice_generate_func = None
+        
+        
+def save_image(image_result, *args):
+    image_result.save(*args)
+    
+def save_video(video_result, *args):
+    pass
+
+def save_voice(voice_result, *args):
+    pass

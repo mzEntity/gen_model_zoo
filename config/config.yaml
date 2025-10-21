@@ -1,0 +1,5 @@
+pipeline_name: "MyQwenImagePipeline"
+
+model_config_file_path: "config/QwenImage.yaml"
+
+input_config_file_path: "task/t2i.json"
