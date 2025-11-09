@@ -116,7 +116,7 @@ class MyWanDiffusersPipeline(MyBasePipeline):
         self.pipeline = WanPipeline.from_pretrained(model_path, vae=vae, torch_dtype=torch.bfloat16)
         self.pipeline.to(self.device)
     
-    def __call__(self, text, negative_text):
+    def __call__(self, text, negative_text=""):
         height = 480
         width = 832
         num_frames = 81

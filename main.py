@@ -8,9 +8,9 @@ import importlib
 def main(main_config_file_path):
     cfg = read_file_to_dict(main_config_file_path)
 
-    pipeline_name = cfg.pipeline_name
+    pipeline_name = cfg['pipeline_name']
     
-    model_config_file_path = cfg.model_config_file_path
+    model_config_file_path = cfg['model_config_file_path']
     model_cfg = read_file_to_dict(model_config_file_path)
     
     try:
@@ -21,11 +21,11 @@ def main(main_config_file_path):
     
     pipeline = pipeline_class(**model_cfg)
         
-    input_config_file_path = cfg.input_config_file_path
+    input_config_file_path = cfg['input_config_file_path']
     input_cfg = read_file_to_dict(input_config_file_path)
     
-    input_base_dir = input_cfg.input_base
-    output_base_dir = input_cfg.output_base
+    input_base_dir = input_cfg['input_base']
+    output_base_dir = input_cfg['output_base']
     os.makedirs(output_base_dir, exist_ok=True)
     
     pipeline.set_io_base(input_base_dir, output_base_dir)
