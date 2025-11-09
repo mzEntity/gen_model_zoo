@@ -4,11 +4,13 @@ from .myqwen.image_gen import (
 )
 
 from .mywan.video_gen import (
-    MyWanTI2VPipeline
+    MyWanTI2VPipeline,
+    MyWanDiffusersPipeline
 )
 
 __all__ = [
     "MyQwenImagePipeline",
     "MyQwenImageEditPlusPipeline",
-    "MyWanTI2VPipeline"
+    "MyWanTI2VPipeline",
+    "MyWanDiffusersPipeline"
 ]

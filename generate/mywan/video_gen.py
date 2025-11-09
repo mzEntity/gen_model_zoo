@@ -101,4 +101,46 @@ class MyWanTI2VPipeline(MyBasePipeline):
             self.pipeline = None
             torch.cuda.empty_cache()
             gc.collect()
+
+
+import torch
+from diffusers import AutoencoderKLWan, WanPipeline
+from diffusers.utils import export_to_video
+
+
+# Available models: Wan-AI/Wan2.1-T2V-14B-Diffusers, Wan-AI/Wan2.1-T2V-1.3B-Diffusers
+class MyWanDiffusersPipeline(MyBasePipeline):
+    def __init__(self, model_path):
+        self.device = "cuda"
+        vae = AutoencoderKLWan.from_pretrained(model_path, subfolder="vae", torch_dtype=torch.float32)
+        self.pipeline = WanPipeline.from_pretrained(model_path, vae=vae, torch_dtype=torch.bfloat16)
+        self.pipeline.to(self.device)
     
+    def __call__(self, text, negative_text):
+        height = 480
+        width = 832
+        num_frames = 81
+        guidance_scale = 5.0
+        
+        output = self.pipeline(
+            prompt=text,
+            negative_prompt=negative_text,
+            height=height,
+            width=width,
+            num_frames=num_frames,
+            guidance_scale=guidance_scale
+        ).frames[0]
+        
+        return output
+    
+    def save(self, video, **output_cfg):
+        save_path = output_cfg['path']
+        sample_fps = 15
+        export_to_video(video, save_path, fps=sample_fps)
+    
+    def close(self):
+        if self.pipeline is not None:
+            del self.pipeline
+            self.pipeline = None
+            torch.cuda.empty_cache()
+            gc.collect()
